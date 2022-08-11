@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:subway/provider.dart';
-import 'package:subway/subway_api.dart';
 import 'package:subway/subway_view_model.dart';
+
+import 'debounce.dart';
 
 class Subway extends StatefulWidget {
   const Subway({Key? key}) : super(key: key);
@@ -13,6 +14,8 @@ class Subway extends StatefulWidget {
 
 class _SubwayState extends State<Subway> {
   final _texteditingcontroller = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 500);
+
 
   @override
   void dispose() {
@@ -34,6 +37,11 @@ class _SubwayState extends State<Subway> {
           padding: const EdgeInsets.all(8),
           child: TextField(
             controller: _texteditingcontroller,
+            onChanged: (value) {
+              if (value.isNotEmpty) {
+                _debouncer.run(()=> viewModel.fetchArrivalLists(_texteditingcontroller.text));
+              }
+            },
             decoration: InputDecoration(
                 hintText: '역이름 입력',
                 suffixIcon: GestureDetector(
